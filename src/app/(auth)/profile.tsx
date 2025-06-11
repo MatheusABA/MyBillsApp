@@ -1,8 +1,9 @@
 import colors from "@/src/constants/colors";
 import { useAuth } from "@/src/contexts/AuthContext";
-import { updateProfile } from "@/src/services/profile.service";
+import profileService from "@/src/services/profile.service";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import * as ImagePicker from "expo-image-picker";
+import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function ProfileScreen() {
@@ -10,37 +11,93 @@ export default function ProfileScreen() {
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Campos editáveis
   const [username, setUsername] = useState(user?.username || "");
   const [fullName, setFullName] = useState(user?.full_name || "");
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url || "");
 
-  async function handleSave() {
-    setLoading(true);
-    const { error } = await updateProfile(user.id, {
-      username,
-      full_name: fullName,
-      avatar_url: avatarUrl,
-    });
-    setLoading(false);
+  async function handlePickAvatar() {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+      });
 
-    if (error) {
-      Alert.alert("Erro", "Não foi possível atualizar o perfil.");
-    } else {
-      setUser({ ...user, username, full_name: fullName, avatar_url: avatarUrl });
-      setEditing(false);
-      Alert.alert("Sucesso", "Perfil atualizado!");
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setLoading(true);
+        try {
+          const url = await profileService.uploadAvatar(user.id, result.assets[0].uri);
+          setAvatarUrl(url);
+        } catch (e) {
+          console.log("Erro ao fazer upload do avatar:", e);''
+          Alert.alert("Erro", "Não foi possível fazer upload do avatar.");
+        }
+        setLoading(false);
+      }
+    } catch (e) {
+      Alert.alert("Erro", "Não foi possível acessar a galeria.");
     }
   }
+
+  async function handleSave() {
+    setLoading(true);
+    try {
+      const { error } = await profileService.updateProfile(user.id, {
+        username,
+        full_name: fullName,
+        avatar_url: avatarUrl,
+      });
+      setLoading(false);
+
+      if (error) {
+        Alert.alert("Erro", "Não foi possível atualizar o perfil.");
+      } else {
+        setUser({ ...user, username, full_name: fullName, avatar_url: avatarUrl });
+        setEditing(false);
+        Alert.alert("Sucesso", "Perfil atualizado!");
+      }
+    } catch (err) {
+      setLoading(false);
+      Alert.alert("Erro", "Não foi possível atualizar o perfil.");
+    }
+  }
+
+  async function fetchProfile() {
+    try {
+      setLoading(true);
+      const data = await profileService.getProfile(user.id);
+      setUsername(data?.username || "");
+      setFullName(data?.full_name || "");
+      setAvatarUrl(data?.avatar_url || "");
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+      Alert.alert("Erro", "Não foi possível carregar o perfil.");
+    }
+  }
+
+
+  useEffect(() => {
+    fetchProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <View style={styles.container}>
       <View style={styles.avatarContainer}>
-        {avatarUrl ? (
-          <Image source={{ uri: avatarUrl }} style={styles.avatarImg} />
-        ) : (
-          <Ionicons name="person-circle" size={100} color={colors.primary} />
-        )}
+        <TouchableOpacity onPress={editing ? handlePickAvatar : undefined} disabled={!editing}>
+          {avatarUrl ? (
+            <Image source={{ uri: avatarUrl }} style={styles.avatarImg} />
+          ) : (
+            <Ionicons name="person-circle" size={100} color={colors.primary} />
+          )}
+          {editing && (
+            <View style={styles.cameraIcon}>
+              <Ionicons name="camera" size={28} color={colors.primary} />
+            </View>
+          )}
+        </TouchableOpacity>
       </View>
       <Text style={styles.title}>Perfil</Text>
       <View style={styles.infoBox}>
@@ -53,7 +110,7 @@ export default function ProfileScreen() {
             placeholder="Nome de usuário"
           />
         ) : (
-          <Text style={styles.value}>{user?.username || "-"}</Text>
+          <Text style={styles.value}>{username || "-"}</Text>
         )}
 
         <Text style={styles.label}>Nome completo</Text>
@@ -65,23 +122,11 @@ export default function ProfileScreen() {
             placeholder="Nome completo"
           />
         ) : (
-          <Text style={styles.value}>{user?.full_name || "-"}</Text>
+          <Text style={styles.value}>{fullName || "-"}</Text>
         )}
 
         <Text style={styles.label}>Email</Text>
-        <Text style={styles.value}>{user?.email || "-"}</Text>
-
-        <Text style={styles.label}>Avatar URL</Text>
-        {editing ? (
-          <TextInput
-            style={styles.input}
-            value={avatarUrl}
-            onChangeText={setAvatarUrl}
-            placeholder="URL da imagem"
-          />
-        ) : (
-          <Text style={styles.value}>{user?.avatar_url || "-"}</Text>
-        )}
+        <Text style={[styles.value, { fontSize: 16 }]}>{user?.email || "-"}</Text>
       </View>
 
       {editing ? (
@@ -122,6 +167,14 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     backgroundColor: "#eee",
+  },
+  cameraIcon: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 2,
   },
   title: {
     fontSize: 26,

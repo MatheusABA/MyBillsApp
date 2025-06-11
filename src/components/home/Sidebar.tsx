@@ -2,10 +2,9 @@ import { useAuth } from "@/src/contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-const { width } = Dimensions.get("window");
-const SIDEBAR_WIDTH = width * 0.5;
+
 
 interface SidebarProps {
   isOpen: boolean;
@@ -17,6 +16,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { user } = useAuth();
 
     if (!isOpen) return null;
+
+  
 
     return (
       <View style={[styles.overlay]}>
@@ -31,7 +32,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 router.push("/(auth)/profile");
               }}
             >
-              <Ionicons name="person-circle" size={50} color="#222" />
+              {user?.avatar_url ? (
+                <Image
+                  source={{ uri: user.avatar_url }}
+                  style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: "#eee" }}
+                />
+              ) : (
+                <Ionicons name="person-circle" size={50} color="#222" />
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
