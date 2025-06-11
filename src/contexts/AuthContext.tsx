@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useEffect, useState} from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 
 type User = any;
 
 interface AuthContextProps {
     user: User | null;
+    setUser: (user: User) => void,
     signIn: (email: string, password: string) => Promise<any>;
     signUp: (email: string, password: string) => Promise<any>;
     signOut: () => Promise<void>;
@@ -13,6 +14,7 @@ interface AuthContextProps {
 
 const AuthContext = createContext<AuthContextProps>({
     user: null,
+    setUser: () => {},
     signIn: async () => {},
     signUp: async () => {},
     signOut: async () => {},
@@ -58,7 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, signIn, signUp, signOut, loading }}>
+    <AuthContext.Provider value={{ user, signIn, signUp, signOut, loading, setUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { View, TextInput, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { useAuth } from "../../contexts/AuthContext";
-import { useRouter } from "expo-router";
 import colors from "@/src/constants/colors";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useAuth } from "../../contexts/AuthContext";
 
-const registerLogo = require("@/assets/register/Wavy_Tech-31_Single-01.jpg");
+const registerLogo = require("@/assets/register/person_wallet_logo.png");
 
 export default function RegisterScreen() {
   const { signUp, loading } = useAuth();
@@ -20,7 +20,7 @@ export default function RegisterScreen() {
         try {
             await signUp(email, password);
             setSuccess("Cadastro realizado! Verifique seu e-mail.");
-            setTimeout(() => router.replace("/login"), 1500);
+            setTimeout(() => router.replace("/login"), 3000); // Redireciona após 3 segundos
         } catch (err: any) {
 
             setError(err.message || "Erro ao criar a conta.");
