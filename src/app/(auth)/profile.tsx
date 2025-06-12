@@ -30,7 +30,7 @@ export default function ProfileScreen() {
           const url = await profileService.uploadAvatar(user.id, result.assets[0].uri);
           setAvatarUrl(url);
         } catch (e) {
-          console.log("Erro ao fazer upload do avatar:", e);''
+          console.log("Erro ao fazer upload do avatar:", e);
           Alert.alert("Erro", "Não foi possível fazer upload do avatar.");
         }
         setLoading(false);
