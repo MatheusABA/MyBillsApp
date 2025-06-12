@@ -5,8 +5,9 @@ export default function Index() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace("/login");
-  }, []);
+    // Redireciona para a página de login
+    router.replace("/(public)/login");
+  }, [router]);
 
   return null;
 }

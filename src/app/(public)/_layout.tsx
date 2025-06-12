@@ -1,7 +1,6 @@
 import { useAuth } from "@/src/contexts/AuthContext";
 import { Stack, useRouter } from "expo-router";
 import { useEffect } from "react";
-import LoginScreen from "./login";
 
 export default function PublicLayout() {
     const { user } = useAuth();
@@ -9,15 +8,16 @@ export default function PublicLayout() {
 
     useEffect(() => {
         if(user) {
-            router.replace("/home");
+            // Se autenticado, redireciona para a home
+            router.replace("/(auth)/home");
         }
-    }, [user])
+    }, [user, router])
 
     return (
         <Stack
-        screenOptions={{
-            headerShown: false,
-        }}
+            screenOptions={{
+                headerShown: false,
+            }}
         />
     );
 }

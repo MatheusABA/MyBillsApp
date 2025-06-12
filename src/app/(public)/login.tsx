@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
-const loginLogo = require("@/assets/login/f448a2a2-1310-4403-95fc-7ab70dd4a843.jpg")
+const loginLogo = require("@/assets/login/wallet_logo.png")
 
 export default function LoginScreen() {
     const { signIn, loading } = useAuth();
@@ -21,6 +21,7 @@ export default function LoginScreen() {
             setTimeout(() => {
                 setError("Ops. Não foi possível fazer login. Tente novamente.");
             }, 500)
+            console.error("Login error:", err);
         }
     }
 

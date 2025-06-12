@@ -1,9 +1,9 @@
+import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
-import { AuthProvider, useAuth } from "../contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import colors from "../constants/colors";
-import { useFonts } from "expo-font";
+import { AuthProvider, useAuth } from "../contexts/AuthContext";
 
 
 function AuthGate({ children }: { children: React.ReactNode }) {
@@ -25,9 +25,9 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!loading && !user) {
-      router.replace("/login");
+      router.replace("/(public)/login");
     }
-  }, [user, loading, showSplash]);
+  }, [user, loading, showSplash, router]);
 
   if (loading || showSplash || !fontsLoaded) {
     return (
